@@ -1,0 +1,30 @@
+name: Update Typing Badges
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 23 * * *"
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Fetch MonkeyType data
+        run: |
+          APE=${{ secrets.MONKEYTYPE_APE }}
+          STREAK=$(curl -sH "Authorization: Bearer $APE" https://api.monkeytype.com/users/streak \
+                    | jq '.data.length')
+          PB120=$(curl -sH "Authorization: Bearer $APE" \
+                    "https://api.monkeytype.com/users/personal-bests?mode=time&mode2=120" \
+                    | jq '.data | tonumber')  # pb in WPM
+          jq -n --arg s "$STREAK" --arg p "$PB120" '{streak:($s|tonumber), pb120:($p|tonumber)}' \
+            > public/typing.json
+
+      - name: Publish to branch
+        uses: crazy-max/ghaction-github-pages@v4
+        with:
+          target_branch: typing-badges
+          build_dir: public
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
