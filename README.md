@@ -1,3 +1,5 @@
+# 👋 Hi, I'm Huu
+
 <p align="center">
   <a href="https://github.com/hhnguyen-20">
     <img
@@ -5,7 +7,7 @@
       src="https://github-readme-stats.vercel.app/api?username=hhnguyen-20&show_icons=true&theme=transparent"
     />
   </a>
-  &nbsp;&nbsp;
+    
   <a href="https://github.com/hhnguyen-20">
     <img
       alt="Top Languages"
@@ -22,3 +24,5 @@
     />
   </a>
 </p>
+
+Connect with me on [LinkedIn](https://www.linkedin.com/in/huu-hung-nguyen/).
