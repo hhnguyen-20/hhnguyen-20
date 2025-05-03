@@ -12,14 +12,21 @@ jobs:
 
       - name: Fetch MonkeyType data
         run: |
-          APE=${{ secrets.MONKEYTYPE_APE }}
-          STREAK=$(curl -sH "Authorization: Bearer $APE" https://api.monkeytype.com/users/streak \
-                    | jq '.data.length')
-          PB120=$(curl -sH "Authorization: Bearer $APE" \
-                    "https://api.monkeytype.com/users/personal-bests?mode=time&mode2=120" \
-                    | jq '.data | tonumber')  # pb in WPM
-          jq -n --arg s "$STREAK" --arg p "$PB120" '{streak:($s|tonumber), pb120:($p|tonumber)}' \
-            > public/typing.json
+          set -euo pipefail
+          APE="${{ secrets.MONKEYTYPE_APE }}"
+
+          # 1) streak
+          STREAK_RAW=$(curl -s -H "Authorization: Bearer $APE" https://api.monkeytype.com/users/streak)
+          STREAK=$(jq -r '.data.length // 0' <<<"$STREAK_RAW")
+
+          # 2) personal best for 120s
+          PB_RAW=$(curl -s -H "Authorization: Bearer $APE" \
+            "https://api.monkeytype.com/users/personal-bests?mode=time&mode2=120")
+          PB120=$(jq -r '.data // 0' <<<"$PB_RAW")
+
+          # 3) output JSON
+          jq -n --argjson s "$STREAK" --argjson p "$PB120" \
+            '{streak: $s, pb120: $p}' > public/typing.json
 
       - name: Publish to branch
         uses: crazy-max/ghaction-github-pages@v4
@@ -28,3 +35,4 @@ jobs:
           build_dir: public
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
